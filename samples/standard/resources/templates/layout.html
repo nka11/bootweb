@@ -1,0 +1,27 @@
+
+<!doctype html>
+<html>
+<head>
+    <!-- En-tête de la page -->  
+		<title>{% block title %}bootWeb{% endblock %}</title>
+{% block head %}
+    <meta charset="utf-8" />
+{% endblock %}
+</head>
+<body>
+    <header>
+    {% block header %}
+
+       <nav>
+    </nav>
+   {% endblock %}
+   
+    </header>
+
+    <section id="main_section">
+    {% block content %}{% endblock %}
+  
+        </section>
+<footer>{% block footer %}{% endblock %}</footer>
+</body>
+</html>

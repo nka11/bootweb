@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block head %}
+    {% parent %}
+<style type="text/css">
+#main{
+background-color: #800000;
+font-size: larger;
+color: white;
+width: 40%;
+height: 50%;
+margin-top: 200px;
+margin-left: 400px;
+text-align : center;
+}
+
+-->
+</style>
+{% endblock %}
+{% block content %}
+<div id="main">
+  <div><p>HTTP 401</p> </div>
+      <div><p>Erreur, vous devez être connectés</p> </div>
+      <div><form method="POST" action="/login">
+      	<p>Email ou pseudo : <input type="text" name="email"></p>
+      	<p>Password : <input type="password" name="password"></p>
+      	<p><input type="submit" value="Se connecter"></p>
+      </div>
+      <div>{{err}}</div>
+</div>
+     
+
+{% endblock %}

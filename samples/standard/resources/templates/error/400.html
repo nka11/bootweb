@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block head %}
+    {% parent %}
+<style type="text/css">
+#main{
+background-color: #800000;
+font-size: larger;
+color: white;
+width: 40%;
+height: 50%;
+margin-top: 200px;
+margin-left: 400px;
+text-align : center;
+}
+
+-->
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="main">
+  <div><p>HTTP 400</p> </div>
+      <div><p>Erreur lors de l'interprétation de la requête</p> </div>
+      <div><p>{{ err }}</p></div>
+
+</div>
+{% endblock %}
+

@@ -1,0 +1,24 @@
+{
+  "database": {
+    "host": "localhost",
+    "name": "BootWebDefault"
+  },
+  "fs": {
+    "statics": "/resources/static",
+    "templates": "/resources/templates"
+  },
+  "email": {
+    "server": {
+      "host": "localhost",
+      "ssl": "false",
+      "user": "",
+      "password": ""
+    },
+    "template": {
+      "system": {
+        "from": "bootweb",
+        "cci": "bootweb"
+      }
+    }
+  }
+}

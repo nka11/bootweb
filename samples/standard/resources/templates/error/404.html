@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block head %}
+    {% parent %}
+<style type="text/css">
+#main{
+background-color: #800000;
+font-size: larger;
+color: white;
+width: 40%;
+height: 50%;
+margin-top: 200px;
+margin-left: 400px;
+text-align : center;
+}
+
+-->
+</style>
+{% endblock %}
+{% block content %}
+<div id="main">
+  
+      <div><p>HTTP 404</p> </div>
+      <div><p>La page n'existe plus ou a été deplacé.</p></div>
+      <div>Rechercher sur le site <input type="text" name="search"></div>
+ 
+</div>
+     
+
+{% endblock %}
