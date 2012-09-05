@@ -10,7 +10,7 @@ Dependencies :
 
     apt-get install mongodb
     
-    npm install express@2.5.9 log4js vows mongoose emailjs nconf passport passport-local
+    npm install express@2.5.9 log4js vows mongoose emailjs nconf passport passport-local jugglingdb
 
 Run sample :
 
