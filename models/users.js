@@ -20,27 +20,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 var bootweb = require("../lib/bootweb"),
-    Schema   = bootweb.mongoose.Schema,
-    ObjectId = bootweb.mongoose.ObjectId;
+    schema   = bootweb.getSchema(),
+   // ObjectId = bootweb.mongoose.ObjectId;
     crypto = require('crypto'),
-    User = new Schema({
-
-        pseudo: { type: String, required: true, index: { unique: true, sparse: true } },
-        email: { type: String, required: true, index: { unique: true, sparse: true } },
-        password: String,
-        verified: Boolean,
-        alive: Boolean,
-        active:Boolean,
-        key:String
+    User = schema.define('User',{
+        pseudo:  { type: String, limit: 20, index: true },
+        email:  { type: String, limit: 150, index: true },
+        password: { type: String, limit: 50},
+        registrationDate: {type: Date, 'default': function () { return new Date(); }},
+        verified: { type: Boolean, 'default': false },
+        alive:  { type: Boolean, 'default': false },
+        active: { type: Boolean, 'default': false },
+        key: { type: String, limit: 50}
     });
 
-User.methods.validPassword = function validPassword(password) {
+User.prototype.validPassword = function validPassword(password) {
     var shasum = crypto.createHash('sha1');
     shasum.update(password);
     return this.password === shasum.digest();
 };
 
-User.methods.setNewPassword = function setNewPassword(password,newpassword, validation, callback) {
+User.prototype.changePassword = function changePassword(password,newpassword, validation, callback) {
     var shasumCurrent = crypto.createHash('sha1');
     shasumCurrent.update(password);
     if (this.password === shasumCurrent.digest() && newpassword === validation) {
@@ -54,13 +54,13 @@ User.methods.setNewPassword = function setNewPassword(password,newpassword, vali
         });
     } else {
         return false;
-    };
+    }
 };
-User.methods.setPassword = function setPassword(password) {
+User.prototype.setPassword = function setPassword(password) {
     var shasumCurrent = crypto.createHash('sha1');
     shasumCurrent.update(password);
     this.password = shasumCurrent.digest();
 };
-bootweb.mongoose.model('User',User);
-
+//bootweb.mongoose.model('User',User);
+schema.automigrate();
 exports.User = User;
