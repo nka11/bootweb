@@ -33,6 +33,7 @@ suite.addBatch({
 
 require('./batchs/testUserObject').addBatchs(suite);
 require('./batchs/testInitUsers').addBatchs(suite);
+require('./batchs/testACL').addBatchs(suite);
 
 
 suite.addBatch({
@@ -40,7 +41,7 @@ suite.addBatch({
 		topic: function() {
 			var test = this;
 			mongoose.connect('mongodb://'+ nconf.get("database:host") +'/' + nconf.get("database:name"));
-			//mongoose.connection.db.dropDatabase();
+			mongoose.connection.db.dropDatabase();
 			test.callback();
 		},
 		"Database deleted": function(err) {

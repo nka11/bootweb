@@ -66,7 +66,6 @@ function addBatchs(suite) {
 				assert.ok(user !== null, "user is null");
 				assert.ok(typeof user.validPassword === "function", "function validPassword not referenced in object");
 				assert.ok(typeof user.changePassword === "function", "function changePassword not referenced in object");
-				assert.ok(typeof user.setPassword === "function", "function setPassword not referenced in object");
 			}
 		},
 		"Test create user": {
@@ -84,32 +83,56 @@ function addBatchs(suite) {
 				assert.ok(typeof user === "object", "User in not an object");
 				//assert.ok(user.save instanceof Function);
 			},
-			"Test save user": {
+			"Test setPassword": {
 				topic: function(user) {
-					var test = this;
-					//console.log(_.inspect(arguments));
-					user.save(function(err, user) {
-						test.callback(err, user);
-					});
+					user.password = "testpassword";
+					this.callback(null, user);
 				},
-				"Verify instance": function(err,user) {
-					//console.log(_.inspect(user));
-					assert.ok(user.id !== undefined, "No user id found");
+				"test validPassword": function(err, user) {
+					assert.ok(user.validPassword("testpassword"));
 				},
-				"Native search user by id": {
-					topic : function(user) {
+			
+				"Test save user": {
+					topic: function(user) {
 						var test = this;
-						//console.log(_.inspect(mongoose.Schema));
-						mongoose.connect('mongodb://'+ nconf.get("database:host") +'/' + nconf.get("database:name"));
-						mongoose.connection.collections['users'].findOne({
-							_id: new mongoose.Schema.ObjectId(user.id)
-						},function(err,res){test.callback(err, res)});
+						//console.log(_.inspect(arguments));
+						user.save(function(err, user) {
+							test.callback(err, user);
+						});
 					},
-					"Check return types": function(err, user) {
-						assert.ok(err === null, "Error is not null" + _.inspect(err));
-						assert.ok(user != null, "Error, user is null");
+					"Verify instance": function(err,user) {
+						//console.log(_.inspect(user));
+						assert.ok(user.id !== undefined, "No user id found");
+					},
+					"Native search user by id": {
+						topic : function(user) {
+							var test = this;
+							//console.log(_.inspect(mongoose.Schema));
+							mongoose.connect('mongodb://'+ nconf.get("database:host") +'/' + nconf.get("database:name"));
+							mongoose.connection.collections['users'].findOne({
+								_id: new mongoose.Schema.ObjectId(user.id)
+							},function(err,res){test.callback(err, res)});
+						},
+						"Check return types": function(err, user) {
+							assert.ok(err === null, "Error is not null" + _.inspect(err));
+							assert.ok(user != null, "Error, user is null");
+						}
 					}
 				}
+			}
+		},
+		"Test createUser" : {
+			topic: function() {
+				bootweb.auth.createUser('useremail','testCreateUser','testpassword',this.callback )
+			},
+			"Verify instance": function(err, user) {
+				//console.log(_.inspect(user));
+				assert.ok(user !== undefined, "User is undefined");
+				assert.ok(typeof user === "object", "User in not an object");
+				//assert.ok(user.save instanceof Function);
+			},
+			"test validPassword": function(err, user) {
+				assert.ok(user.validPassword("testpassword"));
 			}
 		}
 	});

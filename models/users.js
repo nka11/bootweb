@@ -34,19 +34,29 @@ var bootweb = require("../lib/bootweb"),
         key: { type: String, limit: 50}
     });
 
+
+
+var salt = 's0m3s3cr3t5a1t';
+
+function calcHash(pass, salt) {
+    var crypto = require('crypto');
+    var hash = crypto.createHash('sha256');
+    hash.update(pass);
+    hash.update(salt);
+    return hash.digest('base64');
+};
+
 User.prototype.validPassword = function validPassword(password) {
-    var shasum = crypto.createHash('sha1');
-    shasum.update(password);
-    return this.password === shasum.digest();
+    return this.password === calcHash(password, salt);
+};
+
+User.setter.password = function (password) {
+    this._password = calcHash(password, salt);
 };
 
 User.prototype.changePassword = function changePassword(password,newpassword, validation, callback) {
-    var shasumCurrent = crypto.createHash('sha1');
-    shasumCurrent.update(password);
-    if (this.password === shasumCurrent.digest() && newpassword === validation) {
-        var shasumNew = crypto.createHash('sha1');
-        shasumNew.update(newpassword);
-        this.password = shasumNew.digest();
+    if (this.password === calcHash(password,salt) && newpassword === validation) {
+        this.password = newpassword;
         this.save(function(err) {
             if (typeof callback === "function") {
                 callback(err);
@@ -55,11 +65,6 @@ User.prototype.changePassword = function changePassword(password,newpassword, va
     } else {
         return false;
     }
-};
-User.prototype.setPassword = function setPassword(password) {
-    var shasumCurrent = crypto.createHash('sha1');
-    shasumCurrent.update(password);
-    this.password = shasumCurrent.digest();
 };
 //bootweb.mongoose.model('User',User);
 schema.automigrate();

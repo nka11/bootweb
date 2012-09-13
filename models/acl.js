@@ -20,32 +20,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 var bootweb =  require("../lib/bootweb"),
-    Schema = bootweb.mongoose.Schema,
-    conn = bootweb.getConnection(),
-    ObjectId = Schema.ObjectId,
+    schema = bootweb.getSchema(),
     _ = require('util'),
     logger = bootweb.getLogger("acl.manager"),
-    UserRoles,ACL,Role;
+    users = require("./users"),
+    UserRoles,ACL,Role,Permission;
 
-var RoleSchema = new Schema({
-    roleName: {type:String, required: true, index: { unique: true}},
-    description: String
-});
-var UserRolesSchema = new Schema({
-    username: {type: String,required: true, index: { unique: true}},
-    roles: [ObjectId]
+Role = schema.define('Role',{
+    roleName: {type:String, index: true},
+    description: {type:String}
 });
 
+UserRoles = schema.define('UserRoles',{
+});
 
-var ACLSchema = new Schema({
-    resourceId: { type: String, required: true, index: true  },
-    role:  { type: ObjectId, required: true, index: true, ref: 'Role'  },
-    permissions: [String]
+UserRoles.belongsTo(Role,{as: 'role', foreignKey: 'roleId'});
+UserRoles.belongsTo(users.User, {as: 'user', foreignKey: 'userId'});
+
+Permission = schema.define('Permission',{
+	name: {type: String, index: true}
+})
+ACL = schema.define('ACL',{
+    resourceId: { type: String, index: true  }
     });
+ACL.belongsTo(Role,{as: 'role', foreignKey: "roleId"});
+ACL.belongsTo(Permission,{as:'permissions', foreignKey:"permissionId"})
 
-
-ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId,username, cb) {
-    UserRoles.findOne({username: username}, function(err, userRoles) {
+ACL.getUserPermissions = function getUserPermissions(resourceId,username, cb) {
+    UserRoles.findOne({where:{username: username}}, function(err, userRoles) {
         if (err) {
             return cb(err);
         }
@@ -77,7 +79,7 @@ ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId,us
     });
 };
 
-ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
+ACL.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
     logger.info("isAuthorized START");
     UserRoles.findOne({username: userName}, function(err, userRoles) {
         if (err !== null) {
@@ -107,71 +109,74 @@ ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, per
     });
 };
 
-ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
-    var adduserRole = function(userRoles, role) {
-    		logger.info("Entered adduserRole");
-			logger.debug(_.inspect({userRoles:userRoles,role: role}));
-            if (userRoles.roles.indexOf(role._id) === -1) {
-                userRoles.roles.push(role._id);
-                userRoles.save(function(err) {
-                    if (err !== null) {
-                        return cb(err);
-                    }
-                    cb(null,userRoles);
-                });
-            } else {
-                cb(null,userRoles);
-            }
-        },
-        addRole = function(userRoles) {
-			logger.info("Entered addRole");
-            logger.debug(_.inspect({userRoles:userRoles}));
-            Role.findOne({roleName: roleName}, function(err, role) {
-                logger.info("Entered Role.findOne");
-                logger.debug(_.inspect({err:err,role: role}));
-                if (err!== null) {
+ACL.addUserRole = function addUserRole(user, roleName, cb) {
+    var 
+        findUserRole = function(role) {
+			logger.info("Entered findUserRole");
+            logger.debug(_.inspect({role:role, user:user}));
+            UserRoles.findOne({where:{userId: user.id, roleId: role.id}}, function(err, userRoles) {
+                logger.info("Entered UserRoles.findOne");
+                logger.debug( _.inspect({err:err,userRoles: userRoles}));
+                if (err != null) {
                     return cb(err);
                 }
-                if (role !== null) {
-                    adduserRole(userRoles,role);
-                } else {
-                    role = new Role({roleName: roleName});
-                    role.save(function(err) {
-						logger.info("Entered role.save");
-						logger.debug(_.inspect({err:err}));
-                        if (err !== null) {
+                if (userRoles == null) {
+        			logger.info("userRoles is null");
+                    userRoles = new UserRoles();
+                    userRoles.user(user);
+                    userRoles.role(role);
+                    userRoles.save(function(err) {
+        				logger.info("Entered UserRoles.save");
+        				logger.debug( _.inspect({err:err}) + " for user " + userRoles.user());
+                        if (err != null) {
                             return cb(err);
                         }
-                        adduserRole(userRoles,role);
+                        return cb(err, userRoles);
                     });
+                } else {
+                    cb(null, userRoles);
                 }
+            });
+        },
+        findRole = function(user) {
+            Role.findOne({where:{roleName: roleName}}, function(err, role) {
+                logger.info("Entered Role.findOne");
+                logger.debug(_.inspect({err:err,role: role}));
+                if (err != null) {
+                    return cb(err);
+                }
+                if (role != null) {
+                    return findUserRole(role);
+                } 
+                Role.create({roleName: roleName}, function(err, role){
+                    role.save(function(err) {
+        				logger.info("Entered role.save");
+    					logger.debug(_.inspect({err:err, role: role}));
+                        if (err != null) {
+                            return cb(err);
+                        }
+                        return findUserRole(role);
+                    });
+                });
             });
         };
     logger.info("AddUserRole START");
-    logger.debug(_.inspect({'userName': userName, 'roleName':roleName }));
-    UserRoles.findOne({username: userName}, function(err, userRoles) {
-        logger.info("Entered UserRoles.findOne");
-        logger.debug( _.inspect({err:err,userRoles: userRoles}));
-        if (err !== null) {
-            return cb(err);
-        }
-        if (userRoles === null) {
-			logger.info("userRoles is null");
-            userRoles = new UserRoles({username: userName});
-            userRoles.save(function(err) {
-				logger.info("Entered UserRoles.save");
-				logger.debug( _.inspect({err:err}));
-                if (err !== null) {
-                    return cb(err);
-                }
-                addRole(userRoles);
-            });
-        } else {
-            addRole(userRoles);
-        }
-    });
+    logger.debug(_.inspect({'user': user, 'roleName':roleName }));
+    if (typeof user === "String") {
+        return users.User.findOne({where: {pseudo: user}}, function(err, user) {
+            if (err != null) {
+                return cb(err);
+            }
+            if (user == null) {
+                return cb("User doesn't exist");
+            }
+            return findRole(user);
+        });
+    } 
+    return findRole(user);
+   
 };
-ACLSchema.statics.removePermissions = function removePermission(resourceId,roleName, permissions, cb) {
+ACL.removePermissions = function removePermission(resourceId,roleName, permissions, cb) {
 	Role.findOne({roleName: roleName}, function(err, role) {
         if (err) {
             return cb(err);
@@ -197,9 +202,9 @@ ACLSchema.statics.removePermissions = function removePermission(resourceId,roleN
 		});
 	});
 };
-ACLSchema.statics.addPermissions = function addPermissions(resourceId,roleName, permissions, cb) {
+ACL.addPermissions = function addPermissions(resourceId,role, permissions, cb) {
     logger.info("addPermission START");
-    logger.debug({resourceId:resourceId,roleName:roleName, permissions:permissions});
+    logger.debug({resourceId:resourceId,role:role, permissions:permissions});
     var addACLPermissions = function(acl) {
             var permid;
             for (permid in permissions) {
@@ -216,7 +221,7 @@ ACLSchema.statics.addPermissions = function addPermissions(resourceId,roleName, 
             });
         },
         addAclRole = function(role) {
-            ACL.findOne({resourceId: resourceId, role: role._id}, function(err, acl) {
+            ACL.findOne({where: {resourceId: resourceId, role: role._id}}, function(err, acl) {
                 if (err) {
                     return cb(err);
                 }
@@ -233,29 +238,26 @@ ACLSchema.statics.addPermissions = function addPermissions(resourceId,roleName, 
                 }
             });
         };
-    Role.findOne({roleName: roleName}, function(err, role) {
-        if (err) {
-            return cb(err);
-        }
-        if (role) {
-            addAclRole(role);
-        } else {
-            role = new Role({roleName: roleName});
-            role.save(function(err) {
-                if (err) {
-                    return cb(err);
-                }
+    if (typeof role === "String") {
+        return Role.findOne({where:{roleName: role}}, function(err, role) {
+            if (err) {
+                return cb(err);
+            }
+            if (role) {
                 addAclRole(role);
-            });
-        }
-    });
-    
+            } else {
+                Role.create({roleName: role}, function(err,role){
+                    if (err) {
+                        return cb(err);
+                    }
+                    addAclRole(role);
+                });
+            }
+        });
+        
+    }
+    addAclRole(role);
 };
 
-bootweb.mongoose.model('Role',RoleSchema);
-bootweb.mongoose.model('UserRoles',UserRolesSchema);
-bootweb.mongoose.model('ACL',ACLSchema);
-UserRoles = conn.model('UserRoles');
-ACL = conn.model('ACL');
-Role = conn.model('Role');
+exports.Role = Role;
 exports.ACL = ACL;
