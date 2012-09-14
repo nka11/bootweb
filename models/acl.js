@@ -203,14 +203,7 @@ ACL.addPermissions = function addPermissions(resource,role, permissions, cb) {
     logger.info("addPermission START");
     logger.debug({resource:resource,role:role, permissions:permissions});
     var findACL = function(role) {
-        var permid;
-        ACL.all(function(err, acls) { // debug code
-            logger.info("ACL all result : " + _.inspect(acls));
-            try {
-            logger.info("ACL first result : " + _.inspect(acls[0].roleId));
-                
-            } catch(e) {}
-        });
+
         logger.debug(_.inspect({where:{resource: resource, roleId: role.id}}));
         ACL.findOne({where:{resource: resource, roleId: role.id}}, function(err, acl){
             logger.info("ACL find result : " + _.inspect({err: err, acl: acl}))
@@ -239,11 +232,13 @@ ACL.addPermissions = function addPermissions(resource,role, permissions, cb) {
                 });
             }
             logger.info("acl found, processing add permission to existing object");
-            for (permid in permissions) {
-                if (!(permissions[permid] in acl.permissions)) {
-                    acl.permissions.push(permissions[permid]);
+            //for (permid in permissions) {
+            permissions.forEach(function(perm){
+                if (acl.permissions.indexOf(perm) < 0) {
+                    acl.permissions.push(perm);
                 }
-            } 
+            });
+            //} 
             acl.save(function(err) {
                 if (err) {
                     return cb(err);

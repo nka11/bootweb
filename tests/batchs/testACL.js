@@ -107,7 +107,7 @@ function addBatchs(suite) {
                         assert.ok(err == null, "error not null : " + _.inspect(err));
                     },
                     "test acl values": function(err, acl, userRole) {
-                        assert.ok(acl.permissions.length === 1, "Permissions length expected 1 is " + acl.permissions.length);
+                        assert.ok(acl.permissions.length === 1, "Permissions length expected 1 is " + acl.permissions.length + "  " + _.inspect(acl.permissions));
                         assert.ok(acl.permissions[0] === "read", "Permissions object doesn't contains expected value " + _.inspect(acl));
                         assert.ok(acl.roleId === userRole.id, "wrong role id in acl");
                     },
@@ -123,8 +123,30 @@ function addBatchs(suite) {
                             console.log({id: acl.id, resource: acl.resource,roleId: acl.roleId});
                             assert.ok(err == null, "error not null : " + _.inspect(err));
                             assert.ok(acl.id === origAcl.id, "a different acl object was created : origId " + origAcl.id + " acl.id" + acl.id);
-                        }
-                    }
+                        },
+                        "Verify permission array": function(err, acl,origAcl, userRole) {
+                            assert.ok(acl.permissions.length === 1, "Permissions length expected 1 is " + acl.permissions.length + "  " + _.inspect(acl.permissions));
+                            assert.ok(acl.permissions[0] === "read", "Permissions object doesn't contains expected value " + _.inspect(acl));
+                        },
+                    
+                         "add another permission": {
+                             topic: function(acl,origAcl, userRole) {
+                                var test = this;
+                                bootweb.ACL.addPermissions("/",userRole, ["write"], function(err,acl){
+                                   test.callback(err, acl,origAcl, userRole); 
+                                });
+                            },
+                            "Verify acl ids": function(err, acl,origAcl, userRole) {
+                                console.log({id: acl.id, resource: acl.resource,roleId: acl.roleId});
+                                assert.ok(err == null, "error not null : " + _.inspect(err));
+                                assert.ok(acl.id === origAcl.id, "a different acl object was created : origId " + origAcl.id + " acl.id" + acl.id);
+                            },
+                            "Verify permission array": function(err, acl,origAcl, userRole) {
+                                assert.ok(acl.permissions.length === 2, "Permissions length expected 1 is " + acl.permissions.length + "  " + + _.inspect(acl.permissions));
+                                assert.ok(acl.permissions[1] === "write", "Permissions object doesn't contains expected value " + _.inspect(acl));
+                            }
+                         }
+                    },
                 }
 			}
     	}

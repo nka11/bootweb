@@ -1,0 +1,12 @@
+#### my_log4js_configuration.json ####
+{
+  "appenders": [
+    {
+      "type": "file",
+      "filename": "test_log_file.log",
+      "maxLogSize": 20480,
+      "backups": 3,
+      "category": "as.BootWeb"
+    }
+  ]
+}
