@@ -37,22 +37,19 @@ UserRoles = schema.define('UserRoles',{
 UserRoles.belongsTo(Role,{as: 'role', foreignKey: 'roleId'});
 UserRoles.belongsTo(users.User, {as: 'user', foreignKey: 'userId'});
 
-Permission = schema.define('Permission',{
-	name: {type: String, index: true}
-})
 ACL = schema.define('ACL',{
-    resourceId: { type: String, index: true  }
-    });
+    resource: { type: String, index: true  },
+    permissions: { type: bootweb.db.Schema.JSON }
+});
 ACL.belongsTo(Role,{as: 'role', foreignKey: "roleId"});
-ACL.belongsTo(Permission,{as:'permissions', foreignKey:"permissionId"})
 
-ACL.getUserPermissions = function getUserPermissions(resourceId,username, cb) {
+ACL.getUserPermissions = function getUserPermissions(resource,username, cb) {
     UserRoles.findOne({where:{username: username}}, function(err, userRoles) {
         if (err) {
             return cb(err);
         }
         if (userRoles) {
-            ACL.where('resourceId',resourceId).
+            ACL.where('resource',resource).
                 where('role')['in'](userRoles.roles).exec(function(err, acls) {
                 var permissions, aclid, permid;
                 if (err) {
@@ -202,16 +199,51 @@ ACL.removePermissions = function removePermission(resourceId,roleName, permissio
 		});
 	});
 };
-ACL.addPermissions = function addPermissions(resourceId,role, permissions, cb) {
+ACL.addPermissions = function addPermissions(resource,role, permissions, cb) {
     logger.info("addPermission START");
-    logger.debug({resourceId:resourceId,role:role, permissions:permissions});
-    var addACLPermissions = function(acl) {
-            var permid;
+    logger.debug({resource:resource,role:role, permissions:permissions});
+    var findACL = function(role) {
+        var permid;
+        ACL.all(function(err, acls) { // debug code
+            logger.info("ACL all result : " + _.inspect(acls));
+            try {
+            logger.info("ACL first result : " + _.inspect(acls[0].roleId));
+                
+            } catch(e) {}
+        });
+        logger.debug(_.inspect({where:{resource: resource, roleId: role.id}}));
+        ACL.findOne({where:{resource: resource, roleId: role.id}}, function(err, acl){
+            logger.info("ACL find result : " + _.inspect({err: err, acl: acl}))
+            if (err != null) {
+                return cb(err);
+            }
+            if (acl == null) {
+                logger.info("No acl found, creating a new object");
+                return ACL.create({
+                    resource: resource,
+                    permissions: permissions,
+                    roleId: role.id
+                }, function(err,acl) {
+                    if (err != null) {
+                        return cb(err);
+                    }
+                    cb(err, acl);
+                    /*logger.info("Adding role to ACL " + _.inspect(role));
+                    acl.role(role);
+                    return acl.save( function(err){
+                         if (err != null) {
+                            return cb(err);
+                        }
+                        cb(err, acl);
+                    });*/
+                });
+            }
+            logger.info("acl found, processing add permission to existing object");
             for (permid in permissions) {
                 if (!(permissions[permid] in acl.permissions)) {
                     acl.permissions.push(permissions[permid]);
                 }
-            }
+            } 
             acl.save(function(err) {
                 if (err) {
                     return cb(err);
@@ -219,44 +251,28 @@ ACL.addPermissions = function addPermissions(resourceId,role, permissions, cb) {
                 logger.info("addPermission acl : " + _.inspect(acl));
                 cb(null,acl);
             });
-        },
-        addAclRole = function(role) {
-            ACL.findOne({where: {resourceId: resourceId, role: role._id}}, function(err, acl) {
-                if (err) {
-                    return cb(err);
-                }
-                if (acl) {
-                    addACLPermissions(acl);
-                } else {
-                    acl = new ACL({resourceId: resourceId, role: role._id});
-                    acl.save(function(err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        addACLPermissions(acl);
-                    });
-                }
-            });
-        };
+        
+        });
+    };
     if (typeof role === "String") {
         return Role.findOne({where:{roleName: role}}, function(err, role) {
             if (err) {
                 return cb(err);
             }
             if (role) {
-                addAclRole(role);
+                findACL(role);
             } else {
                 Role.create({roleName: role}, function(err,role){
                     if (err) {
                         return cb(err);
                     }
-                    addAclRole(role);
+                    findACL(role);
                 });
             }
         });
         
     }
-    addAclRole(role);
+    findACL(role);
 };
 
 exports.Role = Role;
