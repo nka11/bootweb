@@ -201,7 +201,7 @@ ACL.removePermissions = function removePermission(resourceId,roleName, permissio
 };
 ACL.addPermissions = function addPermissions(resource,role, permissions, cb) {
     logger.info("addPermission START");
-    logger.debug({resource:resource,role:role, permissions:permissions});
+    logger.debug({resource:resource,role:role, permissions:permissions, "typeof role": typeof role});
     var findACL = function(role) {
 
         logger.debug(_.inspect({where:{resource: resource, roleId: role.id}}));
@@ -249,25 +249,32 @@ ACL.addPermissions = function addPermissions(resource,role, permissions, cb) {
         
         });
     };
-    if (typeof role === "String") {
-        return Role.findOne({where:{roleName: role}}, function(err, role) {
+    if (typeof role === "string") {
+        var roleName = role;
+        return Role.findOne({where:{roleName: roleName}}, function(err, role) {
             if (err) {
                 return cb(err);
             }
-            if (role) {
-                findACL(role);
+            logger.info("role string found : " + _.inspect(role));
+            if (role != null) {
+                logger.info("processing with role : " + role.roleName);
+                return findACL(role);
             } else {
-                Role.create({roleName: role}, function(err,role){
+                return Role.create({roleName: roleName}, function(err,role){
                     if (err) {
                         return cb(err);
                     }
-                    findACL(role);
+                    return findACL(role);
                 });
             }
         });
         
+    } else {
+        if (role.id !== undefined) {
+            return findACL(role);
+        }
+        cb('[Type error] role !! ' + _.inspect(role));
     }
-    findACL(role);
 };
 
 exports.Role = Role;

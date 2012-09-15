@@ -147,9 +147,66 @@ function addBatchs(suite) {
                             }
                          }
                     },
+                   
+                },
+                "addPermissions with existing role (param as String)": {
+                    topic: function(userRole) {
+                        var
+                            test = this;
+                        //proper addPermissions call
+                        console.log("addPermissions with existing role" + _.inspect(userRole));
+                        userRole.role(function(err, role){
+                            console.log("found role " + _.inspect(role) + "for userRole");
+                            bootweb.ACL.addPermissions("/",role.roleName, ["read"], function(err,acl){
+                               test.callback(err, acl, userRole, role); 
+                            });
+                        });
+                    },
+                    "check new userRole": {
+                        topic: function(acl, userRole,role) {
+                            var test = this;
+                            console.log("(check new) UserRole is " + _.inspect(userRole));
+                            console.log(arguments);
+                            console.log({acl: {roleId:acl.roleId, id: acl.id}});
+                            acl.role(function(err, role) {
+                                test.callback(err, userRole, role);
+                            });
+                        },
+                        "validate acl role object": function(err,userRole, role) {
+                            assert.ok(err == null, 'Error is not null : ' + _.inspect(err));
+                            assert.ok(typeof role === "object", 'type of role : ' + typeof role + ", should be 'object'");
+                            assert.ok(role !== null, 'role is null');
+                            console.log(role);
+                            assert.ok(role.id === userRole.roleId,"role and userRole must have same id : role :" + role.roleName + ":" + role.id + " userRole :" + userRole.roleName + ":" + userRole.id);
+                        }
+                    }
+                },
+                "addPermissions with new role (param as String)": {
+                    topic: function(userRole) {
+                        var
+                            test = this;
+                        //proper addPermissions call
+                        bootweb.ACL.addPermissions("/","testRole1", ["read"], function(err,acl){
+                           test.callback(err, acl, userRole); 
+                        });
+                    },
+                    "check new userRole": {
+                        topic: function(acl, userRole) {
+                            var test = this;
+                            acl.role(function(err, role) {
+                                test.callback(null, userRole, role);
+                            });
+                        },
+                        "validate acl role object": function(err,userRole, role) {
+                            assert.ok(typeof role === "object", 'type of role : ' + typeof role + "should be 'object'");
+                            assert.ok(role !== null, 'role is null');
+                            assert.ok(role.id !== userRole.id,"role and userRole have same id");
+                            assert.ok(role.roleName === "testRole1");
+                        }
+                    }
                 }
 			}
-    	}
+        }
     });
 }
 
