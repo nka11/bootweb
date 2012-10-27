@@ -31,7 +31,9 @@ var bootweb = require("../lib/bootweb"),
         verified: { type: Boolean, 'default': false },
         alive:  { type: Boolean, 'default': false },
         active: { type: Boolean, 'default': false },
-        key: { type: String, limit: 50}
+        key: { type: String, limit: 50},
+        profile: {type: bootweb.db.Schema.JSON},
+        settings: {type: bootweb.db.Schema.JSON}
     });
 
 

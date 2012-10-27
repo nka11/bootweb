@@ -149,7 +149,7 @@ function addBatchs(suite) {
 				//console.log(_.inspect(user));
 				assert.ok(user !== undefined, "User is undefined");
 				assert.ok(typeof user === "object", "User in not an object");
-				//assert.ok(user.save instanceof Function);
+				assert.ok(user.save instanceof Function);
 			},
 			"test validPassword": function(err, user) {
 				assert.ok(user.validPassword("testpassword"));
