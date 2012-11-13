@@ -5,7 +5,7 @@ app is a module identified by it's String.
 
 It should handle at leats a function init
 
-(app)
+(options,cb)
 
 
 and may handle a function mapUrls
@@ -13,7 +13,7 @@ and may handle a function mapUrls
 
 Example :
 
-    exports.init = function(cb) {};
+    exports.init = function(options,cb) {};
     
     exports.mapUrls = function(app,cb) {};
 
@@ -22,7 +22,11 @@ Example :
 How to load an app
 ------------------
 
-reference the module in config.json
+in the bootweb.init callback of your server, just add :
+
+    bootweb.appsRegistry.loadApp(appName,appModule,appConfig);
+
+appConfig param will be injected in app init() at apps init stage.
 
 Access startup config for your app in config.json
 -------------------------------------------------
@@ -30,7 +34,7 @@ Access startup config for your app in config.json
 You can access conf in config.json file using nconf api :
 
     var nconf = require('nconf');
-    exports.init = function(cb) {
+    exports.init = function(options,cb) {
         var host = nconf.get("server:host");
         return cb();
     };
