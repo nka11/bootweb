@@ -32,9 +32,15 @@ var bootweb = require("../lib/bootweb"),
         alive:  { type: Boolean, 'default': false },
         active: { type: Boolean, 'default': false },
         key: { type: String, limit: 50},
+        validationData: {type: bootweb.db.Schema.JSON},
         profile: {type: bootweb.db.Schema.JSON},
         settings: {type: bootweb.db.Schema.JSON}
     });
+
+User.validatesPresenceOf('pseudo', 'email');
+User.validatesLengthOf('password', {min: 5, message: {min: 'Password is too short'}});
+User.validatesUniquenessOf('email', {message: 'email already registered'});
+User.validatesUniquenessOf('pseudo', {message: 'pseudo already registered'});
 
 
 
