@@ -1,8 +1,13 @@
 {
   "database": {
+    "adapter": "mongoose",
     "host": "localhost",
     "name": "BootWebDefault"
   },
+  "server": {
+    "host": "0.0.0.0",
+    "port": "1337"
+  }
   "fs": {
     "statics": "/resources/static",
     "templates": "/resources/templates"
