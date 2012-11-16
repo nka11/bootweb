@@ -82,7 +82,7 @@ ACL.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
         if (err !== null) {
             return cb(err);
         }
-        if (userRoles !== null) {
+        if (userRoles != null) {
             logger.info("userRoles : " + _.inspect(userRoles));
             ACL.where('resourceId',resourceId).
              where('role')['in'](userRoles.roles).exec(function(err, acls) {
