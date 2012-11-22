@@ -38,7 +38,7 @@ var bootweb = require("../lib/bootweb"),
     });
 
 User.validatesPresenceOf('pseudo', 'email');
-User.validatesLengthOf('password', {min: 5, message: {min: 'Password is too short'}});
+//User.validatesLengthOf('password', {min: 5, message: {min: 'Password is too short'}});
 User.validatesUniquenessOf('email', {message: 'email already registered'});
 User.validatesUniquenessOf('pseudo', {message: 'pseudo already registered'});
 

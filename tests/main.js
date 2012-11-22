@@ -31,6 +31,32 @@ var
 
 
 var suite = vows.describe('Bootweb test suite');
+
+suite.addBatch({
+  "Drop test database": {
+    topic: function() {
+			var test = this;
+      bootweb.basedir=dirname;
+      bootweb.initConf(function(err) {
+  			mongoose.connect('mongodb://'+ nconf.get("database:host") +'/' + nconf.get("database:name"), function(){
+            mongoose.connection.db.dropDatabase(function(err){
+            //console.log(err);
+             mongoose.disconnect(test.callback);
+            });
+        });
+  			//mongoose.connection.db.dropDatabase();
+        //setTimeout( function () {
+         
+    		//();
+       // }, 1000);
+      });
+		},
+		"Database deleted": function(err) {
+			assert.ok(err === undefined,"Drop with errors " + _.inspect(err));
+		}
+	}
+});
+
 suite.addBatch({
 	"Initialize bootWeb": {
 		topic: function() {
@@ -56,19 +82,7 @@ require('./batchs/testInitUsers').addBatchs(suite);
 require('./batchs/testACL').addBatchs(suite);
 
 
-suite.addBatch({
-	"Drop test database": {
-		topic: function() {
-			var test = this;
-			mongoose.connect('mongodb://'+ nconf.get("database:host") +'/' + nconf.get("database:name"));
-			mongoose.connection.db.dropDatabase();
-			test.callback();
-		},
-		"Database deleted": function(err) {
-			assert.ok(err === undefined,"Drop with errors " + _.inspect(err));
-		}
-	}
-});
+
 exports.suite = suite;
 
 

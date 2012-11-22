@@ -124,7 +124,7 @@ function addBatchs(suite) {
 						//console.log(_.inspect(user));
 						assert.ok(user.id !== undefined, "No user id found");
 					},
-					"Native search user by id": {
+          /* "Native search user by id": {
 						topic : function(user) {
 							var test = this;
 							//console.log(_.inspect(mongoose.Schema));
@@ -137,7 +137,7 @@ function addBatchs(suite) {
 							assert.ok(err === null, "Error is not null" + _.inspect(err));
 							assert.ok(user != null, "Error, user is null");
 						}
-					}
+					} */
 				}
 			}
 		},
