@@ -54,12 +54,16 @@ ACL = schema.define('ACL', {
   },
   permissions: {
     type: bootweb.db.Schema.JSON
+  },
+  roleId: {
+    type: String,
+    index: true
   }
 });
-ACL.belongsTo(Role, {
-  as: 'role',
-  foreignKey: "roleId"
-});
+//ACL.belongsTo(Role, {
+//  as: 'role',
+//  foreignKey: "roleId"
+//});
 
 ACL.getUserPermissions = function getUserPermissions(resource, username, cb) {
   UserRoles.findOne({
@@ -100,38 +104,70 @@ ACL.getUserPermissions = function getUserPermissions(resource, username, cb) {
   });
 };
 
-ACL.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
+ACL.isAuthorized = function isAuthorized(pseudo, resourceId, permission, cb) {
   logger.info("isAuthorized START");
-  UserRoles.findOne({
+  users.User.findOne({
     where: {
-      username: userName
+      pseudo: pseudo
     }
-  }, function(err, userRoles) {
-    if (err !== null) {
-      return cb(err);
-    }
-    if (userRoles != null) {
-      logger.info("userRoles : " + _.inspect(userRoles));
-      ACL.where('resourceId', resourceId).
-      where('role')['in'](userRoles.roles).exec(function(err, acls) {
-        logger.info("ACL.where : " + _.inspect(acls));
-        var aclid;
-        if (err) {
-          return cb(err);
-        }
-        for (aclid in acls) {
-          if (acls[aclid].permissions.indexOf(permission) > -1) {
-            // User is granted for action on resource
-            return cb(null, true);
+  }, function(err, user) {
+    UserRoles.all({
+      where: {
+        userId: user.id
+      }
+    }, function(err, userRoles) {
+      if (err !== null) {
+        return cb(err);
+      }
+      if (userRoles != null) {
+        logger.info("isAuthorized userRoles : " + _.inspect(userRoles));
+        var rolesId = [],
+          rolesLength = userRoles.length,
+          rolesProcessCnt = 0,
+          processFindACL = function(findIn){
+            rolesProcessCnt = rolesProcessCnt + 1;
+            if (rolesProcessCnt >= rolesLength) {
+              ACL.all({
+                where: {
+                  'resourceId': resourceId,
+                  roleId: {
+                    inq: findIn
+                  }
+                }
+              }, function(err, acls) {
+                logger.info("ACL.where : " + _.inspect(acls));
+                var aclid;
+                if (err) {
+                  return cb(err);
+                }
+                for (aclid in acls) {
+                  if (acls[aclid].permissions.indexOf(permission) > -1) {
+                    // User is granted for action on resource
+                    return cb(null, true);
+                  }
+                }
+                // No matching permission found, user not granted
+                return cb(null, false);
+              });
+            }
+            
+          };
+        userRoles.forEach(function(i) {
+          
+          if (i != undefined) {
+            logger.debug('RoleItem is ' + _.inspect(i) + " roleId : " + i['roleId']);
+            UserRoles.find(i.id,function(err, userRoleUn) {
+              logger.debug('RoleItem.find is ' + _.inspect(userRoleUn) + " roleId : " + userRoleUn['roleId']);
+              rolesId.push(userRoleUn['roleId'].toString());
+              processFindACL(rolesId);
+            });
           }
-        }
-        // No matching permission found, user not granted
-        return cb(null, false);
-      });
-    }
-    else {
-      cb(null, false);
-    }
+        });
+      }
+      else {
+        cb(null, false);
+      }
+    });
   });
 };
 
@@ -163,20 +199,23 @@ ACL.addUserRole = function addUserRole(userDef, roleName, cb) {
           userId: user.id,
           roleId: role.id
         });
-        logger.info(_.inspect({user:user, role:role}));
+        logger.info(_.inspect({
+          user: user,
+          role: role
+        }));
         userRoles.save(function(err) {
-         // userRoles.user(user);
-        //  userRoles.role(role);
-        //   userRoles.save(function(err) {
-            logger.info("Entered UserRoles.save");
-            if (err != null) {
-              logger.error(_.inspect({
-                err: err
-              }) + " for user " + user.pseudo);
-              return cb(err);
-            }
-            return cb(err, userRoles);
-        //  });
+          // userRoles.user(user);
+          //  userRoles.role(role);
+          //   userRoles.save(function(err) {
+          logger.info("Entered UserRoles.save");
+          if (err != null) {
+            logger.error(_.inspect({
+              err: err
+            }) + " for user " + user.pseudo);
+            return cb(err);
+          }
+          return cb(err, userRoles);
+          //  });
         });
       }
       else {

@@ -20,59 +20,98 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 var bootweb = require("../lib/bootweb"),
-    schema   = bootweb.getSchema(),
-   // ObjectId = bootweb.mongoose.ObjectId;
-    crypto = require('crypto'),
-    User = schema.define('User',{
-        pseudo:  { type: String, limit: 20, index: true },
-        email:  { type: String, limit: 150, index: true },
-        password: { type: String, limit: 50},
-        registrationDate: {type: Date, 'default': function () { return new Date(); }},
-        verified: { type: Boolean, 'default': false },
-        alive:  { type: Boolean, 'default': false },
-        active: { type: Boolean, 'default': false },
-        key: { type: String, limit: 50},
-        validationData: {type: bootweb.db.Schema.JSON},
-        profile: {type: bootweb.db.Schema.JSON},
-        settings: {type: bootweb.db.Schema.JSON}
-    });
+  schema = bootweb.getSchema(),
+  // ObjectId = bootweb.mongoose.ObjectId;
+  crypto = require('crypto'),
+  User = schema.define('User', {
+    pseudo: {
+      type: String,
+      limit: 20,
+      index: true
+    },
+    email: {
+      type: String,
+      limit: 150,
+      index: true
+    },
+    password: {
+      type: String,
+      limit: 50
+    },
+    registrationDate: {
+      type: Date,
+      'default': function() {
+        return new Date();
+      }
+    },
+    verified: {
+      type: Boolean,
+      'default': false
+    },
+    alive: {
+      type: Boolean,
+      'default': false
+    },
+    active: {
+      type: Boolean,
+      'default': false
+    },
+    key: {
+      type: String,
+      limit: 50
+    },
+    validationData: {
+      type: bootweb.db.Schema.JSON
+    },
+    profile: {
+      type: bootweb.db.Schema.JSON
+    },
+    settings: {
+      type: bootweb.db.Schema.JSON
+    }
+  });
 
 User.validatesPresenceOf('pseudo', 'email');
 //User.validatesLengthOf('password', {min: 5, message: {min: 'Password is too short'}});
-User.validatesUniquenessOf('email', {message: 'email already registered'});
-User.validatesUniquenessOf('pseudo', {message: 'pseudo already registered'});
+User.validatesUniquenessOf('email', {
+  message: 'email already registered'
+});
+User.validatesUniquenessOf('pseudo', {
+  message: 'pseudo already registered'
+});
 
 
 
 var salt = 's0m3s3cr3t5a1t';
 
 function calcHash(pass, salt) {
-    var crypto = require('crypto');
-    var hash = crypto.createHash('sha256');
-    hash.update(pass);
-    hash.update(salt);
-    return hash.digest('base64');
+  var crypto = require('crypto');
+  var hash = crypto.createHash('sha256');
+  hash.update(pass);
+  hash.update(salt);
+  return hash.digest('base64');
 };
 
 User.prototype.validPassword = function validPassword(password) {
-    return this.password === calcHash(password, salt);
+  return this.password === calcHash(password, salt);
 };
 
-User.setter.password = function (password) {
-    this._password = calcHash(password, salt);
+User.setter.password = function(password) {
+  this._password = calcHash(password, salt);
 };
 
-User.prototype.changePassword = function changePassword(password,newpassword, validation, callback) {
-    if (this.password === calcHash(password,salt) && newpassword === validation) {
-        this.password = newpassword;
-        this.save(function(err) {
-            if (typeof callback === "function") {
-                callback(err);
-            }
-        });
-    } else {
-        return false;
-    }
+User.prototype.changePassword = function changePassword(password, newpassword, validation, callback) {
+  if (this.password === calcHash(password, salt) && newpassword === validation) {
+    this.password = newpassword;
+    this.save(function(err) {
+      if (typeof callback === "function") {
+        callback(err);
+      }
+    });
+  }
+  else {
+    return false;
+  }
 };
 //bootweb.mongoose.model('User',User);
 schema.automigrate();
