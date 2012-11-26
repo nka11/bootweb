@@ -1,2 +1,32 @@
 { "name" : "bootweb",
-  "main" : "./lib/bootweb.js" }
+  "main" : "./lib/bootweb.js",
+  "version": "0.0.2-beta",
+  "description": "web framework on top of express for quickly writing web applications",
+  "keywords": ["expressjs", "web framework"],
+  "contributors": [
+      { "name": "Nicolas Karageuzian", "email": "nico@karageuzian.com" }
+    ],
+    "homepage": "http://redmine.menestrel.net/projects/bootweb",
+    "bugs":{
+    "url" : "http://redmine.menestrel.net/projects/bootweb",
+    "email" : "bootweb@menestrel.net"
+    },
+    "repository" :
+  { "type" : "git"
+  , "url" : "https://github.com/nka11/bootweb.git"
+  },
+  "dependencies" :
+      { "express" : "3"
+      , "log4js" : "0.5"
+      , "vows" : "0.6"
+      , "mongoose" : "3.3"
+      , "mongodb": "1.1"
+      , "emailjs" : "0.3"
+      , "nconf" : "0.6"
+      , "passport" : "0.1"
+      , "passport-local" : "0.1"
+      , "passport-facebook" : "0.1"
+      , "consolidate": "0.5"
+      , "swig" : "git+https://github.com/nka11/swig.git#multi-root"
+      }
+}
