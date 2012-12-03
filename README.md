@@ -15,4 +15,8 @@ Dependencies :
 Run tests :
     ./node_modules/vows/bin/vows --spec tests/main.js
     
+Other docs :
+
+https://github.com/nka11/bootweb/blob/master/APP.md
+https://github.com/nka11/bootweb/blob/master/AuthAndACL.md
 More doc to come soon, for the impatient, tweet me at @nka_11

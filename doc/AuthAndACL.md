@@ -46,7 +46,7 @@ Allows dev to check ACL for a route :
  
     app.get('/path/to/res',bootweb.auth.verify("read"), function(req,res,next){res.send("allowed");});
 
-*NOTE:* the verify string param is *mandatory*. If not specified, the last part of url will be used. The example above and the folloging line are equivalent :
+*NOTE:* the verify string param is *optional*. If not specified, the last part of url will be used. The example above and the folloging line are equivalent :
 
     app.get('/path/to/res/read',bootweb.auth.verify(), function(req,res,next){res.send("allowed");});
 
