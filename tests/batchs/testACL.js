@@ -166,45 +166,35 @@ function addBatchs(suite) {
             } 
           },
 
-        }/*,
+        },
         "addPermissions with existing role (param as String)": {
           topic: function(userRoles) {
             var
             test = this;
-            //proper addPermissions call
-            bootweb.ACL.Role.findById(userRoles.roles[0],function(err, role) {
-              //console.log("addPermissions with existing role" + _.inspect(userRoles));
-              bootweb.ACL.addPermissions("/", role.roleName, ["read"], function(err, acl) {
-                test.callback(err, acl, userRoles, role);
+            
+              bootweb.ACL.addPermissions("/", 'testRole', ["read"], function(err, acl) {
+                test.callback(err, acl, userRoles);
               });
-            });
           },
           "check new userRole": {
-            topic: function(acl, userRole, role) {
+            topic: function(acl, userRole) {
               var test = this;
               //console.log("(check new) UserRole is " + _.inspect(userRole));
               
-              console.log({
-                acl: {
-                  roleId: acl.roleId,
-                  id: acl.id
-                }
-              });
-              bootweb.ACL.Role.findById(acl.roleId,function(err, role) {
-                test.callback(err, userRole, role);
-              });
+              //console.log(arguments);
+                test.callback(null,acl, userRole);
             },
-            "validate acl role object": function(err, userRole, role) {
+            "validate acl role object": function(err, acl, userRole) {
               assert.ok(err == null, 'Error is not null : ' + _.inspect(err));
-              assert.ok(typeof role === "object", 'type of role : ' + typeof role + ", should be 'object'");
-              assert.ok(role !== null, 'role is null');
-              console.log(arguments);
-              assert.ok(role.id === userRole.roleId, "role and userRole must have same id : role :" + role.roleName + ":" + role.id + " userRole :" + userRole.roleName + ":" + userRole.id);
+              assert.ok(typeof userRole === "object", 'type of role : ' + typeof userRole + ", should be 'object'");
+              assert.ok(userRole !== null, 'role is null');
+              //console.log(arguments);
+              assert.ok(userRole.roles[0].toString() === acl.roleId.toString(), "role and acl doesn't match userRole.roles[0] : " + userRole.roles[0] + " acl.roleId = " + acl.roleId);
             }
           },
           
-        }*/
-        /*,
+        }
+        ,
         "addPermissions with new role (param as String)": {
           topic: function(userRole) {
             var
@@ -214,25 +204,17 @@ function addBatchs(suite) {
               test.callback(err, acl, userRole);
             });
           },
-          "check new userRole": {
-            topic: function(acl, userRole) {
-              var test = this;
-              bootweb.ACL.Role.find(acl.roleId,function(err, role) {
-                test.callback(null, userRole, role);
-              });
-            },
-            "validate acl role object": function(err, userRole, role) {
-              //console.log(arguments);
-              assert.ok(role instanceof Array, 'type of role : ' + typeof role + "should be 'array'");
-              assert.ok(role.length > 0, 'role is null');
-              assert.ok(role[0] !== null, 'role is null');
-              assert.ok(role[0].toString() !== userRole.roles[0].toString(), "role and userRole have same id");
-            }
+          "validate acl role object": function(err, acl, userRole) {
+              assert.ok(err == null, 'Error is not null : ' + _.inspect(err));
+              assert.ok(typeof userRole === "object", 'type of role : ' + typeof userRole + ", should be 'object'");
+              assert.ok(userRole !== null, 'role is null');
+              console.log(arguments);
+              assert.ok(userRole.roles[0].toString() !== acl.roleId.toString(), "role and acl match userRole.roles[0] : " + userRole.roles[0] + " acl.roleId = " + acl.roleId);
           }
           ,
           
           
-        } */
+        }
       }
     }
   });
