@@ -56,7 +56,7 @@ var ACLSchema = new Schema({
     index: true
   },
   roleId: {
-    type: ObjectId,
+    type: String,
     required: true,
     index: true,
     ref: 'Role'
@@ -121,11 +121,8 @@ ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, u
 };
 
 ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
-  logger.info("isAuthorized START");
-  var _isAuthorized = function(user) {
-    UserRoles.findOne({
-      userId: user._id
-    }, function(err, userRoles) {
+  logger.info("isAuthorized START (" + userName + ","+resourceId+","+permission+")");
+  var __isAuthorized = function(err, userRoles) {
       if (err !== null) {
         return cb(err);
       }
@@ -151,7 +148,14 @@ ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, per
       else {
         cb(null, false);
       }
-    });
+    },
+    _isAuthorized = function(user) {
+    if (user == null) {
+      user = {_id: "anonymous"}
+    }
+    UserRoles.findOne({
+      userId: user._id
+    }, __isAuthorized);
   };
   if (typeof userName === "string") {
     User.findOne({
@@ -337,7 +341,7 @@ ACLSchema.statics.addPermissions = function addPermissions(resourceId, roleName,
   addAclRole = function(role) {
     ACL.findOne({
       resourceId: resourceId,
-      roleId: role._id
+      roleId: role._id.toString()
     }, function(err, acl) {
       if (err) {
         return cb(err);

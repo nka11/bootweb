@@ -141,11 +141,7 @@ function addBatchs(suite) {
                 });
               },
               "Verify acl ids": function(err, acl, origAcl, userRole) {
-                console.log({
-                  id: acl.id,
-                  resource: acl.resource,
-                  roleId: acl.roleId
-                });
+                console.log(arguments);
                 assert.ok(err == null, "error not null : " + _.inspect(err));
                 assert.ok(acl.id === origAcl.id, "a different acl object was created : origId " + origAcl.id + " acl.id" + acl.id);
               },
@@ -163,7 +159,27 @@ function addBatchs(suite) {
                 assert.ok(err == null, "Error : " + _.inspect(err));
                 assert.ok(isAuth, "Not authorized");
               }
-            } 
+            },
+             "test isAuthorized for unauthorized user to a given resource": {
+              topic: function(acl, userRole) {
+                //console.log(arguments);
+                bootweb.ACL.isAuthorized('testACL', '/', 'ready', this.callback);
+              },
+              "Check result ok": function(err, isAuth) {
+                assert.ok(err == null, "Error : " + _.inspect(err));
+                assert.ok(!isAuth, "Not authorized");
+              },
+            },
+            "test isAuthorized for existing user to a undefined resource": {
+              topic: function(acl, userRole) {
+                //console.log(arguments);
+                bootweb.ACL.isAuthorized('testACL', '/testUnexisting', 'ready', this.callback);
+              },
+              "Check result ok": function(err, isAuth) {
+                assert.ok(err == null, "Error : " + _.inspect(err));
+                assert.ok(!isAuth, "Not authorized");
+              }
+            }
           },
 
         },
