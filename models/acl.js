@@ -68,19 +68,19 @@ var ACLSchema = new Schema({
 UserRolesSchema.methods.user = function(cb) {
   conn.model('User').findById(this.userId, cb);
 }
-ACLSchema.pre('save', function(next){
+ACLSchema.pre('save', function(next) {
   var acl = this;
   //logger.warn(_.inspect(this));
   var u = {}, a = [];
-   for(var i = 0, l = acl.permissions.length; i < l; ++i){
-      if(u.hasOwnProperty(acl.permissions[i])) {
-         continue;
-      }
-      a.push(acl.permissions[i]);
-      u[acl.permissions[i]] = 1;
-   }
-    acl.permissions = a;
-    next();
+  for (var i = 0, l = acl.permissions.length; i < l; ++i) {
+    if (u.hasOwnProperty(acl.permissions[i])) {
+      continue;
+    }
+    a.push(acl.permissions[i]);
+    u[acl.permissions[i]] = 1;
+  }
+  acl.permissions = a;
+  next();
 });
 ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, username, cb) {
   logger.info("getUserPermissions START");
@@ -121,37 +121,39 @@ ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, u
 };
 
 ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
-  logger.info("isAuthorized START (" + userName + ","+resourceId+","+permission+")");
+  logger.info("isAuthorized START (" + userName + "," + resourceId + "," + permission + ")");
   var __isAuthorized = function(err, userRoles) {
-      if (err !== null) {
-        return cb(err);
-      }
-      logger.info("isAuthorized userRoles : " + _.inspect(userRoles));
-      if (userRoles !== null) {
-        ACL.where('resourceId', resourceId).
-        where('roleId')['in'](userRoles.roles).exec(function(err, acls) {
-          //logger.info("ACL.where : " + _.inspect(acls));
-          var aclid;
-          if (err) {
-            return cb(err);
+    if (err !== null) {
+      return cb(err);
+    }
+    logger.info("isAuthorized userRoles : " + _.inspect(userRoles));
+    if (userRoles !== null) {
+      ACL.where('resourceId', resourceId).
+      where('roleId')['in'](userRoles.roles).exec(function(err, acls) {
+        //logger.info("ACL.where : " + _.inspect(acls));
+        var aclid;
+        if (err) {
+          return cb(err);
+        }
+        for (aclid in acls) {
+          if (acls[aclid].permissions.indexOf(permission) > -1) {
+            // User is granted for action on resource
+            return cb(null, true);
           }
-          for (aclid in acls) {
-            if (acls[aclid].permissions.indexOf(permission) > -1) {
-              // User is granted for action on resource
-              return cb(null, true);
-            }
-          }
-          // No matching permission found, user not granted
-          return cb(null, false);
-        });
-      }
-      else {
-        cb(null, false);
-      }
-    },
-    _isAuthorized = function(user) {
+        }
+        // No matching permission found, user not granted
+        return cb(null, false);
+      });
+    }
+    else {
+      cb(null, false);
+    }
+  },
+  _isAuthorized = function(user) {
     if (user == null) {
-      user = {_id: "anonymous"}
+      user = {
+        _id: "anonymous"
+      }
     }
     UserRoles.findOne({
       userId: user._id
@@ -166,10 +168,11 @@ ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, per
       };
       _isAuthorized(user)
     })
-      } else {
+  }
+  else {
     _isAuthorized(userName);
   }
-  
+
 };
 
 ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
@@ -183,13 +186,13 @@ ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
       userRoles.roles.push(role._id);
       userRoles.save(function(err) {
         if (err !== null) {
-          return cb(err);
+          if (typeof cb === "function") return cb(err);
         }
-        cb(null, userRoles);
+        if (typeof cb === "function") cb(null, userRoles);
       });
     }
     else {
-      cb(null, userRoles);
+      if (typeof cb === "function") cb(null, userRoles);
     }
   },
   addRole = function(userRoles) {
@@ -385,13 +388,16 @@ ACLSchema.statics.addPermissions = function addPermissions(resourceId, roleName,
         });
       }
     });
-    
-  } else if (roleName instanceof Role){
+
+  }
+  else if (roleName instanceof Role) {
     logger.debug("roleName is a Role");
     addAclRole(roleName);
-  } else if (roleName instanceof UserRoles) {
+  }
+  else if (roleName instanceof UserRoles) {
     cb("Cannot process, wrong type");
-  } else {
+  }
+  else {
     cb("Wrong Role : " + _.inspect(roleName));
   }
 
