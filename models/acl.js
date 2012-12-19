@@ -121,16 +121,21 @@ ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, u
 };
 
 ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
-  logger.info("isAuthorized START (" + userName + "," + resourceId + "," + permission + ")");
+  logger.info("isAuthorized START ('" + userName + "','" + resourceId + "','" + permission + "')");
   var __isAuthorized = function(err, userRoles) {
     if (err !== null) {
       return cb(err);
     }
     logger.info("isAuthorized userRoles : " + _.inspect(userRoles));
     if (userRoles !== null) {
-      ACL.where('resourceId', resourceId).
-      where('roleId')['in'](userRoles.roles).exec(function(err, acls) {
-        //logger.info("ACL.where : " + _.inspect(acls));
+      //ACL.find({}, function(err,res) {console.log(res)});
+      var roles = [];
+      userRoles.roles.forEach(function(role){roles.push(role.toString())});
+      logger.debug("found rolesId : " + _.inspect(roles));
+      ACL.where('resourceId', resourceId)
+      ['in']('roleId',roles)
+      .exec(function(err, acls) {
+        logger.info("ACL.where : " + _.inspect(acls));
         var aclid;
         if (err) {
           return cb(err);
@@ -321,6 +326,7 @@ ACLSchema.statics.removePermissions = function removePermission(resourceId, role
 };
 ACLSchema.statics.addPermissions = function addPermissions(resourceId, roleName, permissions, cb) {
   logger.info("addPermission START");
+  resourceId = resourceId.replace(/\/+$/, ""); // remove trailing / (if any)
   logger.debug({
     resourceId: resourceId,
     roleName: roleName,
