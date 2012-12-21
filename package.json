@@ -28,7 +28,6 @@
       , "passport-local" : "0.1"
       , "passport-facebook" : "0.1"
       , "socket.io": "0.9"
-      , "passport.socketio": "0"
       , "consolidate": "0.5"
       , "swig" : "git+https://github.com/nka11/swig.git#loop-bug"
       }
