@@ -122,6 +122,7 @@ ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, u
 
 ACLSchema.statics.isAuthorized = function isAuthorized(userName, resourceId, permission, cb) {
   logger.info("isAuthorized START ('" + userName + "','" + resourceId + "','" + permission + "')");
+  resourceId = resourceId.replace(/\/+$/, ""); // remove trailing / (if any)
   var __isAuthorized = function(err, userRoles) {
     if (err !== null) {
       return cb(err);
@@ -294,6 +295,7 @@ ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
 };
 ACLSchema.statics.removePermissions = function removePermission(resourceId, roleName, permissions, cb) {
   logger.info("removePermissions START");
+  resourceId = resourceId.replace(/\/+$/, ""); // remove trailing / (if any)
   Role.findOne({
     roleName: roleName
   }, function(err, role) {
