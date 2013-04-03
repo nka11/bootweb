@@ -82,17 +82,17 @@ ACLSchema.pre('save', function(next) {
   acl.permissions = a;
   next();
 });
-ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, username, cb) {
+ACLSchema.statics.getUserPermissions = function getUserPermissions(resourceId, userId, cb) {
   logger.info("getUserPermissions START");
   UserRoles.findOne({
-    username: username
+    userId: userId
   }, function(err, userRoles) {
     if (err) {
       return cb(err);
     }
     if (userRoles) {
       ACL.where('resourceId', resourceId).
-      where('role')['in'](userRoles.roles).exec(function(err, acls) {
+      where('roleId')['in'](userRoles.roles).exec(function(err, acls) {
         var permissions, aclid, permid;
         if (err) {
           return cb(err);
@@ -193,12 +193,13 @@ ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
       userRoles.save(function(err) {
         if (err !== null) {
           if (typeof cb === "function") return cb(err);
+          return logger.error(err);
         }
-        if (typeof cb === "function") cb(null, userRoles);
+        if (typeof cb === "function") return cb(null, userRoles);
       });
     }
     else {
-      if (typeof cb === "function") cb(null, userRoles);
+      if (typeof cb === "function") return cb(null, userRoles);
     }
   },
   addRole = function(userRoles) {
@@ -283,8 +284,11 @@ ACLSchema.statics.addUserRole = function addUserRole(userName, roleName, cb) {
       if (err != null) {
         cb(err);
       }
-      user = foundUser;
-      return _addUserRole();
+      if (foundUser != null) {
+        user = foundUser;
+        return _addUserRole();
+      }
+      cb("user does not exist");
     });
   }
   else {
