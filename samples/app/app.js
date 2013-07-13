@@ -18,19 +18,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
-var bootweb = require('bootweb'), // import de la bibliotheque bootweb
+var bootweb = require('bootweb'), // import the bootweb library
   path = require("path"), // lib path (voir doc nodejs)
-  conn, // reference future pour la connexion
-  logger = bootweb.getLogger('bootweb-compta'), //facilité de logs
-  _ = require("util"), // import de lib utilitaire
+  conn, // future reference for the db connexion
+  logger = bootweb.getLogger('bootweb-sample'), //log facility
+  _ = require("util"), // we may use util library
   /**
-   * Définition de l'application compta
+   * Our application instance, will be registered by the server instance
    */
   sample_app = new bootweb.App(); // our application
   
 
 /**
- * Pour que Bootweb démarre notre appli, nous devons faire une function d'initialisation
+ * Init method should be implemented
  */
 sample_app.init = function(options, cb) { // Bootweb first calls App.init()
   logger.info("Starting sample_app initialization");

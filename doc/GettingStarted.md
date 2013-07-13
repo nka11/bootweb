@@ -1,5 +1,6 @@
 x Steps guide for getting started with bootweb
 ==============================================
+     ---- What bootweb will be, none if this is implemented yet, #sortof #tasklist
 
 Create a project
 ----------------
@@ -14,7 +15,7 @@ Go to your workspace directory then run :
 
 This will create a populated tree of a bootweb applications server and a basic
 runnable script with builtin user registration/authentication (forms and controllers)
-plus access to the ACL API
+plus access to the ACL API. you can find the template of an application server in samples/standard
 
 
 Customize your project
