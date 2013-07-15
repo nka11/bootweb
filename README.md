@@ -17,7 +17,8 @@ Run tests :
     
 Other docs :
 
-https://github.com/nka11/bootweb/blob/master/doc/APP.md
+https://github.com/nka11/bootweb/blob/master/doc/AppServer.md
 https://github.com/nka11/bootweb/blob/master/doc/AuthAndACL.md
+https://github.com/nka11/bootweb/blob/master/doc/App.md
 
 More doc to come soon, for the impatient, tweet me at @nka_11
