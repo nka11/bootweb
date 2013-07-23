@@ -4,7 +4,7 @@ Bootweb Application Server quickstart
 In order to start any webserver, you need some basic code to make a service
 listen on a port and answer to requests.
 
-Bootweb handles many aspects of a webserver and comes with a buitin authentication and ACL system.
+Bootweb handles many aspects of a webserver (HTTP Server) and comes with a buitin authentication and ACL system.
 
 This assumes you have created some directory structure to host the resources of your server.
 
