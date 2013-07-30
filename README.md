@@ -35,7 +35,7 @@ node 0.8.x (some updates in the roadmap) and npm
     git clone https://github.com/nka11/bootweb
     cd bootweb
     npm install
-    npm link
+    sudo npm link
 
 Run tests :
 
@@ -45,9 +45,13 @@ Run tests :
 Getting Started
 ---------------
 
-# Start an application server - https://github.com/nka11/bootweb/blob/master/doc/AppServer.md
-# Build an application - https://github.com/nka11/bootweb/blob/master/doc/App.md
-# Use Authentication and ACL - https://github.com/nka11/bootweb/blob/master/doc/AuthAndACL.md
+Follow the guide : https://github.com/nka11/bootweb/blob/master/doc/GettingStarted.md and give feedback ;)
+
+Other docs
+
+ * Start an application server - https://github.com/nka11/bootweb/blob/master/doc/AppServer.md
+ * Build an application - https://github.com/nka11/bootweb/blob/master/doc/App.md
+ * Use Authentication and ACL - https://github.com/nka11/bootweb/blob/master/doc/AuthAndACL.md
 
 
 More doc to come soon, for the impatient, tweet @nka_11
