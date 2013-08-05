@@ -29,7 +29,18 @@ Installation
 
 Dependencies :
 
-node 0.8.x (some updates in the roadmap) and npm
+node 0.8.x (some updates in the roadmap) and npm.
+If node is higher than 0.8.x on your packaging system, follow the code :
+
+    git clone https://github.com/joyent/node
+    cd node
+    git fetch origin
+    git checkout v0.8.25
+    ./configure
+    make
+    make install
+
+Install mongodb dependency
 
     sudo apt-get install mongodb
     git clone https://github.com/nka11/bootweb
