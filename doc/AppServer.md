@@ -37,3 +37,7 @@ when all components are initialised, bootweb emits a 'ready' event. It means we 
 access to the whole API, and any third party service we may be connecting to, especially
 the database backend.
 
+Before starting the server, run `npm link bootweb` in your appServer directory, this will reference bootweb in your dependencies.
+
+Once everything is done, run `node <yourFile>.js` and browse http://localhost:1337/ to see your code in action.
+
